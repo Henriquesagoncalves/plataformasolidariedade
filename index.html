@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plataforma de Solidariedade!</title>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #333; }
+    header {
+      background: linear-gradient(135deg, #6fbf9b, #a8d5ba);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+    main { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      margin-bottom: 30px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+    }
+    h2 { margin-top: 0; }
+    .tipo-buttons { display: flex; gap: 10px; margin-bottom: 15px; }
+    .tipo-buttons button { flex: 1; padding: 10px; border: 1px solid #6fbf9b; background: white; color: #4f8f74; cursor: pointer; border-radius: 5px; font-weight: bold; }
+    .tipo-buttons button.active { background: #6fbf9b; color: white; }
+    form input, form textarea { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
+    form button { width: 100%; padding: 12px; background: #6fbf9b; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    .listas { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .item { border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .item:last-child { border-bottom: none; }
+    footer { text-align: center; padding: 20px; font-size: 14px; color: #777; }
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #25D366;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 50px;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 999;
+    }
+
+    .whatsapp-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🤝 PLATAFORMA DE SOLIDARIEDADE</h1>
+  <p>Conectando quem precisa com quem pode ajudar!</p>
+</header>
+
+<main>
+  <div class="card">
+    <h2>Cadastro</h2>
+
+    <div class="tipo-buttons">
+      <button id="btnPrecisa" class="active">🙏 PRECISO DE AJUDA</button>
+      <button id="btnDoa">❤️ QUERO DOAR</button>
+    </div>
+
+    <form id="formCadastro">
+      <input type="text" id="nome" placeholder="Nome" required />
+      <input type="text" id="cidade" placeholder="Cidade" required />
+      <input type="text" id="contato" placeholder="Contato (WhatsApp, telefone ou e-mail)" required />
+      <textarea id="descricao" placeholder="Descreva sua necessidade" required></textarea>
+      <button type="submit">Cadastrar</button>
+    </form>
+  </div>
+
+  <div class="listas">
+    <div class="card">
+      <h2>🙏 Pessoas que precisam de ajuda</h2>
+      <div id="listaPrecisa"></div>
+    </div>
+
+    <div class="card">
+      <h2>❤️ Pessoas que querem doar</h2>
+      <div id="listaDoa"></div>
+    </div>
+  </div>
+
+  <section class="card" style="margin-top:30px;">
+    <h2>Vagas de Emprego</h2>
+    <p>As vagas abaixo são exibidas diretamente do site Classificados TimTim:</p>
+    <iframe src="http://www.classificadostimtim.com.br/#/anuncios/2/anuncios-balcao"
+      style="width:100%; height:600px; border:1px solid #ddd; border-radius:8px;"
+      loading="lazy"></iframe>
+  </section>
+
+  <section class="card" style="margin-top:30px;">
+    <h2>Outras Vagas de Emprego</h2>
+    <p>Confira também oportunidades disponíveis na plataforma parceira:</p>
+    <iframe src="https://sis.proinsight.com.br/candidato/?banco_curriculo=f232598e6c2bcf9d961844c134586c103e4f0323&view=vagas&cidade=Patos%20de%20Minas"
+      style="width:100%; height:600px; border:1px solid #ddd; border-radius:8px;"
+      loading="lazy"></iframe>
+  </section>
+</main>
+
+<footer>
+  Projeto social • Solidariedade que conecta pessoas
+</footer>
+
+<a href="https://wa.me/5534997718416" target="_blank" class="whatsapp-btn" aria-label="Suporte via WhatsApp">
+  💬 Precisa de ajuda?
+</a>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    databaseURL: "https://SEU_PROJETO.firebaseio.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "SEU_ID",
+    appId: "SEU_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+  const cadastrosRef = ref(database, 'cadastros');
+
+  let tipoSelecionado = 'precisa';
+
+  const btnPrecisa = document.getElementById('btnPrecisa');
+  const btnDoa = document.getElementById('btnDoa');
+  const descricao = document.getElementById('descricao');
+
+  btnPrecisa.onclick = () => {
+    tipoSelecionado = 'precisa';
+    btnPrecisa.classList.add('active');
+    btnDoa.classList.remove('active');
+    descricao.placeholder = 'Descreva sua necessidade';
+  };
+
+  btnDoa.onclick = () => {
+    tipoSelecionado = 'doa';
+    btnDoa.classList.add('active');
+    btnPrecisa.classList.remove('active');
+    descricao.placeholder = 'Descreva como você pode ajudar';
+  };
+
+  document.getElementById('formCadastro').onsubmit = (e) => {
+    e.preventDefault();
+
+    const nome = document.getElementById('nome').value;
+    const cidade = document.getElementById('cidade').value;
+    const contato = document.getElementById('contato').value;
+    const desc = descricao.value;
+
+    push(cadastrosRef, { nome, cidade, contato, desc, tipo: tipoSelecionado });
+    e.target.reset();
+  };
+
+  function atualizarListas(cadastros) {
+    const listaPrecisa = document.getElementById('listaPrecisa');
+    const listaDoa = document.getElementById('listaDoa');
+    listaPrecisa.innerHTML = '';
+    listaDoa.innerHTML = '';
+
+    Object.values(cadastros || {}).forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `<strong>${c.nome}</strong> – ${c.cidade}<br><small><b>Contato:</b> ${c.contato}</small><p>${c.desc}</p>`;
+      c.tipo === 'precisa' ? listaPrecisa.appendChild(div) : listaDoa.appendChild(div);
+    });
+  }
+
+  onValue(cadastrosRef, (snapshot) => atualizarListas(snapshot.val()));
+</script>
+
+</body>
+</html>
